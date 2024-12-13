@@ -1,7 +1,7 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { verifyToken, isDesigner } = require('../middlewares/auth.middleware');
-const designerController = require('../controllers/designer.controller');
+const { verifyToken, isDesigner } = require("../middlewares/auth.middleware");
+const designerController = require("../controllers/designer.controller");
 
 /**
  * @swagger
@@ -68,7 +68,7 @@ const designerController = require('../controllers/designer.controller');
  *         description: Unauthorized
  *       403:
  *         description: Forbidden - Designers only
- * 
+ *
  * /api/designer/questions/{id}:
  *   get:
  *     summary: Get a specific question
@@ -137,7 +137,7 @@ const designerController = require('../controllers/designer.controller');
  *         description: Question deleted successfully
  *       404:
  *         description: Question not found
- * 
+ *
  * /api/designer/categories:
  *   get:
  *     summary: Get all categories
@@ -172,7 +172,7 @@ const designerController = require('../controllers/designer.controller');
  *     responses:
  *       201:
  *         description: Category created successfully
- * 
+ *
  * /api/designer/categories/{id}:
  *   put:
  *     summary: Update a category
@@ -217,7 +217,7 @@ const designerController = require('../controllers/designer.controller');
  *         description: Category deleted successfully
  *       404:
  *         description: Category not found
- * 
+ *
  * components:
  *   schemas:
  *     Question:
@@ -263,15 +263,73 @@ const designerController = require('../controllers/designer.controller');
  *           format: date-time
  */
 
-router.get('/questions', verifyToken, isDesigner, designerController.getQuestions);
-router.post('/questions', verifyToken, isDesigner, designerController.createQuestion);
-router.get('/questions/:id', verifyToken, isDesigner, designerController.getQuestion);
-router.put('/questions/:id', verifyToken, isDesigner, designerController.updateQuestion);
-router.delete('/questions/:id', verifyToken, isDesigner, designerController.deleteQuestion);
 
-router.get('/categories', verifyToken, isDesigner, designerController.getCategories);
-router.post('/categories', verifyToken, isDesigner, designerController.createCategory);
-router.put('/categories/:id', verifyToken, isDesigner, designerController.updateCategory);
-router.delete('/categories/:id', verifyToken, isDesigner, designerController.deleteCategory);
+// router.post('/questions/:id/related/:relatedId', verifyToken, isDesigner, designerController.addRelatedQuestion);
+// router.delete('/questions/:id/related/:relatedId', verifyToken, isDesigner, designerController.removeRelatedQuestion);
+
+router.get(
+  "/questions",
+  verifyToken,
+  isDesigner,
+  designerController.getQuestions
+);
+router.post(
+  "/questions",
+  verifyToken,
+  isDesigner,
+  designerController.createQuestion
+);
+router.get(
+  "/questions/:id",
+  verifyToken,
+  isDesigner,
+  designerController.getQuestion
+);
+router.put(
+  "/questions/:id",
+  verifyToken,
+  isDesigner,
+  designerController.updateQuestion
+);
+router.delete(
+  "/questions/:id",
+  verifyToken,
+  isDesigner,
+  designerController.deleteQuestion
+);
+
+router.get(
+  "/categories",
+  verifyToken,
+  isDesigner,
+  designerController.getCategories
+);
+router.post(
+  "/categories",
+  verifyToken,
+  isDesigner,
+  designerController.createCategory
+);
+router.put(
+  "/categories/:id",
+  verifyToken,
+  isDesigner,
+  designerController.updateCategory
+);
+router.delete(
+  "/categories/:id",
+  verifyToken,
+  isDesigner,
+  designerController.deleteCategory
+);
+
+module.exports = router;
+
+router.delete(
+  "/categories/:id",
+  verifyToken,
+  isDesigner,
+  designerController.deleteCategory
+);
 
 module.exports = router;

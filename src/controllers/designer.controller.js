@@ -75,6 +75,19 @@ const designerController = {
     }
   },
 
+  addRelatedQuestion: async (req, res) => {
+  try {
+    const question = await Question.findOneAndUpdate(
+      { _id: req.params.id, creator: req.user.userId },
+      { $addToSet: { relatedQuestions: req.params.relatedId } },
+      { new: true }
+    );
+    res.json(question);
+  } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  },
+
   deleteQuestion: async (req, res) => {
     try {
       const question = await Question.findOneAndDelete({
