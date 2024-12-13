@@ -261,11 +261,72 @@ const designerController = require("../controllers/designer.controller");
  *         createdAt:
  *           type: string
  *           format: date-time
+ *
+ * /api/designer/questions/{id}/related/{relatedId}:
+ *   post:
+ *     summary: Add a related question
+ *     tags: [Designer]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: relatedId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Related question added successfully
+ *       404:
+ *         description: Question not found
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Designers only
+ *   delete:
+ *     summary: Remove a related question
+ *     tags: [Designer]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: path
+ *         name: relatedId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Related question removed successfully
+ *       404:
+ *         description: Question not found
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Designers only
  */
 
-
-// router.post('/questions/:id/related/:relatedId', verifyToken, isDesigner, designerController.addRelatedQuestion);
-// router.delete('/questions/:id/related/:relatedId', verifyToken, isDesigner, designerController.removeRelatedQuestion);
+router.post(
+  "/questions/:id/related/:relatedId",
+  verifyToken,
+  isDesigner,
+  designerController.addRelatedQuestion
+);
+router.delete(
+  "/questions/:id/related/:relatedId",
+  verifyToken,
+  isDesigner,
+  designerController.removeRelatedQuestion
+);
 
 router.get(
   "/questions",
@@ -316,15 +377,6 @@ router.put(
   isDesigner,
   designerController.updateCategory
 );
-router.delete(
-  "/categories/:id",
-  verifyToken,
-  isDesigner,
-  designerController.deleteCategory
-);
-
-module.exports = router;
-
 router.delete(
   "/categories/:id",
   verifyToken,

@@ -7,33 +7,52 @@ const playerController = require("../controllers/player.controller");
  * @swagger
  * /api/player/questions:
  *   get:
- *     summary: Get all questions for players
+ *     summary: Get filtered questions for players
  *     tags: [Player]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: Category ID to filter questions
+ *       - in: query
+ *         name: difficulty
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 5
+ *         description: Difficulty level to filter questions
  *     responses:
  *       200:
- *         description: List of questions
+ *         description: List of questions (without correct answers)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/PlayerQuestion'
  *       401:
  *         description: Unauthorized
- *       403:
- *         description: Access denied. Players only.
  *
  * /api/player/questions/random:
  *   get:
- *     summary: Get a random question
+ *     summary: Get a random unanswered question
  *     tags: [Player]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Random question
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Access denied. Players only.
+ *         description: A random question
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PlayerQuestion'
+ *       404:
+ *         description: No more questions available
  *
- * /api/player/questions/{id}/answer:
+ * /api/player/questions/{id}/submit:
  *   post:
  *     summary: Submit an answer for a question
  *     tags: [Player]
@@ -56,29 +75,47 @@ const playerController = require("../controllers/player.controller");
  *               - answer
  *             properties:
  *               answer:
- *                 type: number
+ *                 type: integer
  *                 description: Index of the selected answer
  *     responses:
  *       200:
  *         description: Answer submission result
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Access denied. Players only.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 correct:
+ *                   type: boolean
+ *                 pointsEarned:
+ *                   type: integer
+ *                 feedback:
+ *                   type: string
+ *       400:
+ *         description: Question already answered
+ *       404:
+ *         description: Question not found
  *
  * /api/player/leaderboard:
  *   get:
- *     summary: Get the player leaderboard
+ *     summary: Get top 10 players leaderboard
  *     tags: [Player]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Leaderboard data
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Access denied. Players only.
+ *         description: Top 10 players by points
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   username:
+ *                     type: string
+ *                   points:
+ *                     type: integer
  *
  * /api/player/follow/designer/{id}:
  *   post:
@@ -95,11 +132,9 @@ const playerController = require("../controllers/player.controller");
  *         description: Designer ID
  *     responses:
  *       200:
- *         description: Successfully followed designer
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Access denied. Players only.
+ *         description: Designer followed successfully
+ *       404:
+ *         description: Designer not found
  *
  * /api/player/follow/player/{id}:
  *   post:
@@ -116,11 +151,37 @@ const playerController = require("../controllers/player.controller");
  *         description: Player ID
  *     responses:
  *       200:
- *         description: Successfully followed player
- *       401:
- *         description: Unauthorized
- *       403:
- *         description: Access denied. Players only.
+ *         description: Player followed successfully
+ *       404:
+ *         description: Player not found
+ *
+ * components:
+ *   schemas:
+ *     PlayerQuestion:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         text:
+ *           type: string
+ *         options:
+ *           type: array
+ *           items:
+ *             type: string
+ *         category:
+ *           type: object
+ *           properties:
+ *             _id:
+ *               type: string
+ *             name:
+ *               type: string
+ *         difficulty:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 5
+ *         createdAt:
+ *           type: string
+ *           format: date-time
  */
 
 router.get("/questions", verifyToken, isPlayer, playerController.getQuestions);
@@ -131,7 +192,7 @@ router.get(
   playerController.getRandomQuestion
 );
 router.post(
-  "/questions/:id/answer",
+  "/questions/:id/submit",
   verifyToken,
   isPlayer,
   playerController.submitAnswer

@@ -76,14 +76,14 @@ const designerController = {
   },
 
   addRelatedQuestion: async (req, res) => {
-  try {
-    const question = await Question.findOneAndUpdate(
-      { _id: req.params.id, creator: req.user.userId },
-      { $addToSet: { relatedQuestions: req.params.relatedId } },
-      { new: true }
-    );
-    res.json(question);
-  } catch (error) {
+    try {
+      const question = await Question.findOneAndUpdate(
+        { _id: req.params.id, creator: req.user.userId },
+        { $addToSet: { relatedQuestions: req.params.relatedId } },
+        { new: true }
+      );
+      res.json(question);
+    } catch (error) {
       res.status(400).json({ message: error.message });
     }
   },
@@ -101,6 +101,21 @@ const designerController = {
       res.json({ message: "Question deleted" });
     } catch (error) {
       res.status(500).json({ message: error.message });
+    }
+  },
+  removeRelatedQuestion: async (req, res) => {
+    try {
+      const question = await Question.findOneAndUpdate(
+        { _id: req.params.id, creator: req.user.userId },
+        { $pull: { relatedQuestions: req.params.relatedId } },
+        { new: true }
+      );
+      if (!question) {
+        return res.status(404).json({ message: "Question not found" });
+      }
+      res.json(question);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
     }
   },
 

@@ -1,5 +1,6 @@
 const Question = require("../models/question.model");
 const User = require("../models/user.model");
+const Category = require("../models/category.model");
 
 const calculatePoints = (difficulty) => {
   const basePoints = 10;
@@ -12,7 +13,15 @@ const playerController = {
       const { category, difficulty } = req.query;
       const query = {};
 
-      if (category) query.category = category;
+      if (category) {
+        const categoryDoc = await Category.findOne({ name: category });
+        if (categoryDoc) {
+          query.category = categoryDoc._id;
+        } else {
+          return res.status(404).json({ message: "Category not found" });
+        }
+      }
+
       if (difficulty) query.difficulty = parseInt(difficulty);
 
       const questions = await Question.find(query)
@@ -108,6 +117,17 @@ const playerController = {
       if (!designer || designer.role !== "designer") {
         return res.status(404).json({ message: "Designer not found" });
       }
+
+      // Add designer to user's following list
+      await User.findByIdAndUpdate(req.user.userId, {
+        $addToSet: { following: designer._id },
+      });
+
+      // Add user to designer's followers list
+      await User.findByIdAndUpdate(designer._id, {
+        $addToSet: { followers: req.user.userId },
+      });
+
       res.json({ message: "Designer followed successfully" });
     } catch (error) {
       res.status(500).json({ message: error.message });
