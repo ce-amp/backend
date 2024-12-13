@@ -51,6 +51,14 @@ const playerController = require("../controllers/player.controller");
  *               $ref: '#/components/schemas/PlayerQuestion'
  *       404:
  *         description: No more questions available
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No more questions available
  *
  * /api/player/questions/{id}/submit:
  *   post:
@@ -154,6 +162,54 @@ const playerController = require("../controllers/player.controller");
  *         description: Player followed successfully
  *       404:
  *         description: Player not found
+ *       400:
+ *         description: Cannot follow yourself
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Cannot follow yourself
+ *
+ * /api/player/unfollow/designer/{id}:
+ *   post:
+ *     summary: Unfollow a designer
+ *     tags: [Player]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Designer ID
+ *     responses:
+ *       200:
+ *         description: Designer unfollowed successfully
+ *       404:
+ *         description: Designer not found
+ *
+ * /api/player/unfollow/player/{id}:
+ *   post:
+ *     summary: Unfollow another player
+ *     tags: [Player]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Player ID
+ *     responses:
+ *       200:
+ *         description: Player unfollowed successfully
+ *       404:
+ *         description: Player not found
  *
  * components:
  *   schemas:
@@ -214,6 +270,18 @@ router.post(
   verifyToken,
   isPlayer,
   playerController.followPlayer
+);
+router.post(
+  "/unfollow/designer/:id",
+  verifyToken,
+  isPlayer,
+  playerController.unfollowDesigner
+);
+router.post(
+  "/unfollow/player/:id",
+  verifyToken,
+  isPlayer,
+  playerController.unfollowPlayer
 );
 
 module.exports = router;

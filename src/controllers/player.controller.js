@@ -13,6 +13,17 @@ const playerController = {
       const { category, difficulty } = req.query;
       const query = {};
 
+      // Get answered questions first
+      const answeredQuestions = await User.findById(req.user.userId).select(
+        "answeredQuestions.question"
+      );
+      const answeredIds = answeredQuestions.answeredQuestions.map(
+        (aq) => aq.question
+      );
+
+      // Add $nin operator to exclude answered questions
+      query._id = { $nin: answeredIds };
+
       if (category) {
         const categoryDoc = await Category.findOne({ name: category });
         if (categoryDoc) {
@@ -26,7 +37,8 @@ const playerController = {
 
       const questions = await Question.find(query)
         .populate("category", "name")
-        .select("-correctAnswer");
+        .select("-correctAnswer")
+        .limit(10);
 
       res.json(questions);
     } catch (error) {
@@ -46,14 +58,20 @@ const playerController = {
 
       const questions = await Question.find({
         _id: { $nin: answeredIds },
-      }).select("-correctAnswer");
+      })
+        .select("-correctAnswer")
+        .limit(10);
 
       if (questions.length === 0) {
         return res.status(404).json({ message: "No more questions available" });
       }
 
-      const randomIndex = Math.floor(Math.random() * questions.length);
-      res.json(questions[randomIndex]);
+      // Return random questions from the limited set
+      const randomQuestions = questions
+        .sort(() => Math.random() - 0.5)
+        .slice(0, Math.min(10, questions.length));
+
+      res.json(randomQuestions);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
@@ -140,7 +158,64 @@ const playerController = {
       if (!playerToFollow || playerToFollow.role !== "player") {
         return res.status(404).json({ message: "Player not found" });
       }
+
+      // Add player to user's following list
+      await User.findByIdAndUpdate(req.user.userId, {
+        $addToSet: { following: playerToFollow._id },
+      });
+
+      // Add user to player's followers list
+      await User.findByIdAndUpdate(playerToFollow._id, {
+        $addToSet: { followers: req.user.userId },
+      });
+
       res.json({ message: "Player followed successfully" });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  unfollowDesigner: async (req, res) => {
+    try {
+      const designer = await User.findById(req.params.id);
+      if (!designer || designer.role !== "designer") {
+        return res.status(404).json({ message: "Designer not found" });
+      }
+
+      // Remove designer from user's following list
+      await User.findByIdAndUpdate(req.user.userId, {
+        $pull: { following: designer._id },
+      });
+
+      // Remove user from designer's followers list
+      await User.findByIdAndUpdate(designer._id, {
+        $pull: { followers: req.user.userId },
+      });
+
+      res.json({ message: "Designer unfollowed successfully" });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+
+  unfollowPlayer: async (req, res) => {
+    try {
+      const playerToUnfollow = await User.findById(req.params.id);
+      if (!playerToUnfollow || playerToUnfollow.role !== "player") {
+        return res.status(404).json({ message: "Player not found" });
+      }
+
+      // Remove player from user's following list
+      await User.findByIdAndUpdate(req.user.userId, {
+        $pull: { following: playerToUnfollow._id },
+      });
+
+      // Remove user from player's followers list
+      await User.findByIdAndUpdate(playerToUnfollow._id, {
+        $pull: { followers: req.user.userId },
+      });
+
+      res.json({ message: "Player unfollowed successfully" });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

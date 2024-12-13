@@ -52,6 +52,23 @@ const userController = {
       res.status(500).json({ message: error.message });
     }
   },
+
+  getAllUsers: async (req, res) => {
+    try {
+      const { role } = req.query;
+      const query = {};
+
+      if (role && ["designer", "player"].includes(role)) {
+        query.role = role;
+      }
+
+      const users = await User.find(query).select("-password").sort("username");
+
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
 };
 
 module.exports = userController;

@@ -5,6 +5,40 @@ const userController = require("../controllers/user.controller");
 
 /**
  * @swagger
+ * /api/users:
+ *   get:
+ *     summary: Get all users
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *           enum: [designer, player]
+ *         description: Filter users by role
+ *     responses:
+ *       200:
+ *         description: List of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   username:
+ *                     type: string
+ *                   role:
+ *                     type: string
+ *                     enum: [designer, player]
+ *                   points:
+ *                     type: number
+ *       401:
+ *         description: Unauthorized
+ *
+ * @swagger
  * /api/users/profile:
  *   get:
  *     summary: Get current user's profile
@@ -136,5 +170,6 @@ router.put("/profile", verifyToken, userController.updateProfile);
 router.get("/following", verifyToken, userController.getFollowing);
 router.get("/followers", verifyToken, userController.getFollowers);
 router.get("/:id", verifyToken, userController.getUserProfile);
+router.get("/", verifyToken, userController.getAllUsers);
 
 module.exports = router;

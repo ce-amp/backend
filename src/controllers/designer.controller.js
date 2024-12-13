@@ -5,9 +5,24 @@ const designerController = {
   // Questions
   getQuestions: async (req, res) => {
     try {
-      const questions = await Question.find({ creator: req.user.userId })
+      const { category, difficulty } = req.query;
+      const query = {};
+
+      if (category) {
+        const categoryDoc = await Category.findOne({ name: category });
+        if (categoryDoc) {
+          query.category = categoryDoc._id;
+        } else {
+          return res.status(404).json({ message: "Category not found" });
+        }
+      }
+
+      if (difficulty) query.difficulty = parseInt(difficulty);
+
+      const questions = await Question.find(query)
         .populate("category", "name")
         .select("-correctAnswer");
+
       res.json(questions);
     } catch (error) {
       res.status(500).json({ message: error.message });

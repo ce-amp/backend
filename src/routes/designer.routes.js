@@ -103,6 +103,11 @@ const designerController = require("../controllers/designer.controller");
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - text
+ *               - options
+ *               - correctAnswer
+ *               - difficulty
  *             properties:
  *               text:
  *                 type: string
@@ -116,6 +121,12 @@ const designerController = require("../controllers/designer.controller");
  *                 type: string
  *               difficulty:
  *                 type: number
+ *                 minimum: 1
+ *                 maximum: 5
+ *               relatedQuestions:
+ *                 type: array
+ *                 items:
+ *                   type: string
  *     responses:
  *       200:
  *         description: Question updated successfully
